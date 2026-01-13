@@ -1,10 +1,24 @@
-The Line Following Robot operates as an automated feedback system that translates environmental data into mechanical movement. It uses a logic-based approach to ensure the robot remains aligned with its intended path.
+## Detailed Working Principle
+The Line Following Robot operates as a closed-loop feedback system that translates environmental data into mechanical movement. This simulation specifically addresses the challenges of testing sensor logic in a virtual environment.
 
-### 1. Path Detection (Input Layer)
-The robot uses two sensors (Left and Right) to monitor the surface below:
+### 1. Sensing & Simulation Logic (Input Layer)
+The robot is designed to navigate by reading binary inputs from two sensors located at the front.
 
-Sensor Type: The simulation uses PIR/IR sensors connected to Digital Pins 2 and 3.
+Actual Hardware: The physical implementation is intended to use Infrared (IR) sensors to detect the contrast between the line and the floor.
 
-Signal Processing: These sensors detect the contrast between the line (usually dark) and the floor (usually light). When a sensor "sees" the path, it sends a HIGH signal to the Arduino; otherwise, it stays LOW.
+Simulation Constraints: In the Tinkercad simulator, PIR sensors are used to represent the sensor logic. However, PIR sensors only stay HIGH for a very short duration after detecting motion.
 
-### 2. The Power Safety SwitchA manual switch (S1/S2) has been integrated into the circuit after the battery and motor driver stages:Purpose: This acts as a physical "Kill Switch" or toggle to interrupt power flow to the motors.Operation: Even if the Arduino sends a "Forward" command, the motors will not spin unless this switch is closed, allowing for safe testing and calibration of the sensors without the robot driving off the table.### 3. Logic & Microcontroller ProcessingThe Arduino UNO acts as the central processor, running a continuous loop to evaluate sensor states:Move Forward: Both sensors detect the line (Left: HIGH, Right: HIGH).Correct Left: Only the right sensor is on the line (Left: LOW, Right: HIGH). The Arduino stops the left motor, causing the robot to pivot left back onto the path.Correct Right: Only the left sensor is on the line (Left: HIGH, Right: LOW). The Arduino stops the right motor to pivot right.Full Stop: Neither sensor detects a line (Left: LOW, Right: LOW), and all motor pins are set to LOW.### 4. Motor Drive (Actuation Layer)Since the Arduino cannot provide the high current required by DC motors, the L293D Motor Driver is utilized:Bridge Control: It takes low-power signals from Arduino pins 8, 9, 10, and 11 to switch the high-power 9V battery supply to the motors.Status Indicators: The circuit includes LEDs (Green/Yellow) with current-limiting resistors ($1k\Omega$) to provide visual feedback of the system's power and motor status.
+Manual Simulation Switches: To overcome the "pulse" nature of the PIR sensors during simulation, slide switches are wired in parallel with each sensor. This allows the user to manually "lock" a sensor state to HIGH. For example, to simulate sustained Forward Movement, the user can slide both switches to the HIGH position, ensuring both input pins receive a constant signal simultaneously.
+
+### 2. Control & ActuationMicrocontroller: 
+An Arduino UNO serves as the processing unit, reading inputs from Pins 2 and 3.Motor Driver: The L293D IC manages the high-current requirements of the DC motors using signals from pins 8, 9, 10, and 11.Visual Indicators: The design includes Green and Yellow LEDs with $1k\Omega$ resistors to provide real-time visual feedback on the logic execution.
+
+### 3. Logic & Movement Table
+The movement is determined by the combined state of the sensor/switch inputs:
+
+| Left Input (Pin 2) | Right Input (Pin 3) | Robot Action | Left Motor | Right Motor |
+| :--- | :--- | :--- | :--- | :--- |
+| **HIGH** | **HIGH** | Forward | Forward | Forward |
+| **LOW** | **HIGH** | Turn Left | Stop | Forward |
+| **HIGH** | **LOW** | Turn Right | Forward | Stop |
+| **LOW** | **LOW** | Stop | Stop | Stop |
